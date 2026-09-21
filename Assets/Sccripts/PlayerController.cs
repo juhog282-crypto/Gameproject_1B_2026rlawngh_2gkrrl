@@ -1,6 +1,13 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
+public enum PlayerState
+{
+    Normal,
+    PickUp,
+}
 
 public class PlayerController : MonoBehaviour
 {
@@ -16,11 +23,13 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private float rotationSpeed = 10f;
 
-     [Header("바닥 설정")]
+    [Header("바닥 설정")]
 
     [SerializeField] private float gravity = -20f;
 
     private CharacterController controller;
+
+    private PlayerState currentState = PlayerState.Normal;
 
     private float verticalVelocity;
 
@@ -29,7 +38,7 @@ public class PlayerController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
     }
-  
+
 
     void Update()
     {
@@ -39,7 +48,25 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
+        //상태와 관계없이 중력은 계속 적용한다.
+        ApplyGravity();
 
+        //Normal 상태가 아니면 이동 입력을 받지 않는다.
+        if (currentState != PlayerState.Normal) return;
+
+        HandleMovement(keyboard);
+
+
+
+    }
+
+    private void ApplyGravity()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void HandleMovement(Keyboard keyboard)
+    {
         Vector2 input = Vector2.zero;
 
         if (keyboard.aKey.isPressed)
@@ -51,9 +78,9 @@ public class PlayerController : MonoBehaviour
         if (keyboard.wKey.isPressed)
             input.x += 1f;
 
-        input = Vector2. ClampMagnitude(input, 1f);
+        input = Vector2.ClampMagnitude(input, 1f);
 
-      
+
         Vector3 cameraForward = cameraTransfrom.forward;
         Vector3 cameraRight = cameraTransfrom.right;
 
@@ -64,7 +91,7 @@ public class PlayerController : MonoBehaviour
         cameraForward.Normalize();
         cameraRight.Normalize();
 
-        
+
         Vector3 moveDirection = cameraForward * input.y + cameraRight * input.x;
         moveDirection = Vector3.ClampMagnitude(moveDirection, 1f);
 
@@ -79,7 +106,7 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-    
+
         if (controller.isGrounded && verticalVelocity < 0f)
         {
             verticalVelocity = -2f;
@@ -99,6 +126,16 @@ public class PlayerController : MonoBehaviour
             animationSpeed = isRunning ? 1f : 0.5f;
         }
         animator.SetFloat("speed", animationSpeed, 0.1f, Time.deltaTime);
+    }
+    public void ChangeState(PlayerState newState)
+    {
+        currentState = newState;
 
+        if (currentState != PlayerState.Normal)
+        {
+            animator.SetFloat("speed", 0);
+        }
+
+        Debug.Log("현재 상태 : " + currentState);
     }
 }
