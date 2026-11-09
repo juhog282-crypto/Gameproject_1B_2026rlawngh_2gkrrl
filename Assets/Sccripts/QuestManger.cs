@@ -6,6 +6,14 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI questText;
     private Quest currentQuest;
 
+    private SimpleInventory Inventory;
+
+    private void Awake()
+    {
+        Inventory = FindAnyObjectByType<SimpleInventory>();
+    }
+
+
     void Start()
     {
         questText.text = "진행 중인 퀘스트가 없습니다.";
@@ -44,8 +52,17 @@ public class QuestManager : MonoBehaviour
     private void StartQuest(Quest newQuest)
     {
         currentQuest = newQuest;
-        currentQuest.currentAmount = 0;
-        currentQuest.state = QuestState.InPrgress;
+        currentQuest.currentAmount = Inventory.GetItemAmount(currentQuest.targetItemName);
+
+        if (currentQuest.currentAmount >= currentQuest.targetAmount)     //미리 보유후 완료가 되었으면 완료 처리
+        {
+            currentQuest.currentAmount = currentQuest.targetAmount;
+            currentQuest.state = QuestState.ReadyToComplete;
+        }
+        else
+        {
+            currentQuest.state = QuestState.InPrgress;
+        }
 
         Debug.Log(currentQuest.questName + "퀘스트 시작!");
         UpdateQuestText();
@@ -70,12 +87,17 @@ public class QuestManager : MonoBehaviour
 
     public void CompleteQuest()
     {
+        if (Inventory.RemoveItem(currentQuest.targetItemName, currentQuest.targetAmount) == false)
+        {
+            Debug.Log("퀘스트 아이템이 부족합니다.");
+            return;
+        }
+
         currentQuest.state = QuestState.Completed;
 
         Debug.Log(currentQuest.questName + "퀘스트 완료!");
         UpdateQuestText();
     }
-
     private void UpdateQuestText()
     {
         if (currentQuest.state == QuestState.InPrgress)

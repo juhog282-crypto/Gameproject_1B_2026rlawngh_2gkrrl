@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
 using System.Collections.Generic;
+using System;
+using System.Diagnostics.Contracts;
 
 public class InventoryItems : MonoBehaviour
 {
@@ -17,8 +19,8 @@ public class InventoryItems : MonoBehaviour
     private bool isOpen;
     private string itemName;
     private string amount;
+    public string description;
 
-    
     private void Awake()
     {
         playerController = GetComponent<PlayerController>();
@@ -65,7 +67,7 @@ public class InventoryItems : MonoBehaviour
         }
     }
 
-    public bool AddItem(string itemName, int amount)
+    public bool AddItem(string itemName, int amount, string description)
     {
         foreach (InventoryItems item in items)          // Slot을 순환하면서 아이템 이름이 같은 것이 있을 경우 수량을 + 해준다.
         {
@@ -83,9 +85,9 @@ public class InventoryItems : MonoBehaviour
             return false;
         }
 
-        InventoryItems newItem = new InventoryItems();
-        newItem.itemName = itemName;
-        newItem.amount = amount;
+        InventoryItems inventoryItems1 = gameObject.AddComponent<InventoryItems>();
+        InventoryItems inventoryItems = inventoryItems1;
+        InventoryItems newItem = inventoryItems;
 
         items.Add(newItem);                            // 아이템 리스트에 넣어준다.
         UpdateUI();                                    // UI를 업데이트 한다.
@@ -133,5 +135,16 @@ public class InventoryItems : MonoBehaviour
             Cursor.visible = false;
         }
     }
+    [System.Serializable]
+    public class InventoryItem
+    {
+        public string itemName;
+
+        public int amount;
+
+        public string decription;
+        internal string description;
+    }
+
 
 }

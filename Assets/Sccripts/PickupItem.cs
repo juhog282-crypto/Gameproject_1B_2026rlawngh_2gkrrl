@@ -9,18 +9,21 @@ public class PickupItem : MonoBehaviour
 
     [SerializeField] private QuestManager questManager;
 
+    [TextArea]
+    [SerializeField] private string description = "아이템 설명이 없습니다";   
+
     [Header("화면 연출")]
     [SerializeField] private float rotationSpeed = 60f;
     [SerializeField] private float floatingHeight = 0.15f;
     [SerializeField] private float floatingSpeed = 2f;
 
-    private InventoryItems inventory;
+    private InventoryItems Inventory;
     private Vector3 startPosition;
 
     private void Awake()
     {
         questManager = FindAnyObjectByType<QuestManager>();
-        Inventory = FindFirstObjectByType<InventoryItems>;
+      
     }
 
 
@@ -39,13 +42,13 @@ public class PickupItem : MonoBehaviour
 
     public void Collect()
     {
-        if (inventory == null)
+        if (Inventory == null)
         {
             Debug.Log("SimpleInventory를 찾을 수 없습니다.");
             return;
         }
 
-        if (inventory.AddItem(itemName, amount) == false)
+        if (Inventory.AddItem(itemName, amount, description) == false)
         {
             return;
         }
